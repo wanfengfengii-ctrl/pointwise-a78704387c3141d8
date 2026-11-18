@@ -42,3 +42,5 @@ class Observation:
     value: Fraction | None
     missing: bool
     quality: Quality
+    # WOBS2 packet subset subscript (0-based); None for WOBS1 packets and legacy records.
+    subset_index: int | None = None

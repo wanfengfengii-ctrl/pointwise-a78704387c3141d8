@@ -51,7 +51,9 @@ with Archive(":memory:") as archive:
 
 `ingest(batch_id, template_binding, byte_chunks)` 返回 ImportReceipt(batch_id, input_digest, observation_count)。输入是 bytes、bytearray 或 memoryview 块的可迭代对象，允许空块和任意分块。摘要覆盖确切绑定和完整包字节。同批次同输入重放返回原回执，不再解码；不同输入或绑定抛 ConflictError。重放也先完整消费源。
 
-`read_observations(batch_id)` 返回不可变 Observation 元组，每条保存 occurrence（模板路径、复制路径、组身份、序号）、station、day、measurement、unit、raw、value、missing 和 quality。value 为 Fraction 或 None；质量是 UNSELECTED、MISSING 或 VALUE(code)，0 为真实质量值。不存在的批次抛 KeyError。
+`ingest_columns(batch_id, template_binding, byte_chunks)` 接入 WOBS2 多子集列包（仅版本2），参数类型、绑定核验、完整源消费、摘要公式与 ImportReceipt 沿用 `ingest`，两入口共用 batch_id 命名空间。它把 1～16 个有序子集的差分列重建为逐子集 V1 载荷并复用同一解码、质量与事务链路；任一子集非法则整包不发布。同号同绑定同字节重放返回原回执，异输入抛 ConflictError。列字节规则见 COLUMNS.md。
+
+`read_observations(batch_id)` 返回不可变 Observation 元组，每条保存 occurrence（模板路径、复制路径、组身份、序号）、station、day、measurement、unit、raw、value、missing 和 quality。value 为 Fraction 或 None；质量是 UNSELECTED、MISSING 或 VALUE(code)，0 为真实质量值。WOBS2 观测另有 subset_index（0 基包内子集下标，全批 sequence 连续），WOBS1 与历史记录为 None。不存在的批次抛 KeyError。
 
 `build_daily(result_id, batch_ids, quality_rule=None)` 返回 DailyResult，含固定 input_binding 和 DailyGroup 元组。批次按排序去重集合解释。规则只允许 accepted_codes（非负整数列表）、allow_unselected、allow_quality_missing（严格布尔值）；默认代码为 [0]，两个允许标志为 false。同语义规则规范化；非法规则抛 ValueError。缺批次抛 KeyError；同成果同绑定返回原成果，异绑定抛 ConflictError。
 
@@ -67,6 +69,6 @@ with Archive(":memory:") as archive:
 
 templates 的 catalog/descriptors/validation/bindings 拥有登记和不可变修订；decoding 的 bits/header/fields/groups/events 拥有连续位游标、组调用和原始事件；observations 的 convert/quality/assemble/validate/models 拥有规范值、组内关联和完整性；archive 的 schema/imports/publication/queries/codecs 拥有事务和固定读取；daily 的 plans/rules/filtering/aggregate/results 拥有固定输入、筛选和精确成果。
 
-tests/test_templates.py 覆盖修订绑定及非法定义；test_ingest.py 覆盖手工样例、复制、分块、单位、截断和源异常；test_quality.py 覆盖三态、缺测占位、父子与相邻组及越界；test_archive.py 用真实 SQLite 触发器验证回滚、重放、重开和初始化；test_daily.py 覆盖固定集合、规则、精确均值、空组、排序和日成果回滚。
+tests/test_templates.py 覆盖修订绑定及非法定义；test_ingest.py 覆盖手工样例、复制、分块、单位、截断和源异常；test_quality.py 覆盖三态、缺测占位、父子与相邻组及越界；test_archive.py 用真实 SQLite 触发器验证回滚、重放、重开和初始化；test_daily.py 覆盖固定集合、规则、精确均值、空组、排序和日成果回滚；test_columns.py 覆盖 WOBS2 差分列、不等长复制、同形子集、变长质量列、头尾损坏、重放冲突、SQLite 回滚、重开保真与新旧入口混合日加工。columns_audit.py 是不依赖 columns_cases 的独立小例核账。
 
 样例的独立核账为风速 100/100=1、300/100=3、1023=缺测。前两项质量为0，因此输入3、接纳2、和4、均值2。demo 先比较实际观测、日成果及重开结果，再打印 POINTWISE_SCENARIO JSON。更多字节规则见 FORMAT.md。

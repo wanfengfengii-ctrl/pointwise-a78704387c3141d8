@@ -23,6 +23,7 @@ def observation_to_record(item):
         "station": item.station, "day": item.day.isoformat(), "measurement": item.measurement,
         "unit": item.unit, "raw": item.raw, "value": fraction_record(item.value),
         "missing": item.missing, "quality": item.quality.state.value, "code": item.quality.code,
+        "subset_index": item.subset_index,
     }, sort_keys=True, separators=(",", ":"))
 
 
@@ -34,4 +35,5 @@ def observation_from_record(record):
     return Observation(identity, data["station"], date.fromisoformat(data["day"]),
                        data["measurement"], data["unit"], data["raw"],
                        fraction_from_record(data["value"]), data["missing"],
-                       Quality(QualityState(data["quality"]), data["code"]))
+                       Quality(QualityState(data["quality"]), data["code"]),
+                       data.get("subset_index"))

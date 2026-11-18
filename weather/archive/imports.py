@@ -7,6 +7,7 @@ from weather.templates.bindings import TemplateBinding
 from weather.decoding.bits import BitReader
 from weather.decoding.header import decode_header, verify_header_binding
 from weather.decoding.groups import expand_template
+from weather.decoding.columns import decode_column_packet
 from weather.observations.models import ObservationError
 from weather.observations.assemble import assemble_observations
 from weather.observations.validate import validate_batch_observations
@@ -37,11 +38,7 @@ class Archive:
     def register_template(self, template_id, revision, descriptors):
         return self.catalog.register_template(template_id, revision, descriptors)
 
-    def ingest(self, batch_id, template_binding, byte_chunks):
-        if not isinstance(batch_id, str) or not batch_id:
-            raise ValueError("batch id must be nonempty text")
-        # Materialize privately; no database transaction is held over source iteration.
-        reader = BitReader(byte_chunks)
+    def _require_registered_binding(self, template_binding):
         if (not isinstance(template_binding, TemplateBinding)
                 or type(template_binding.revision) is not int
                 or not isinstance(template_binding.template_id, str)):
@@ -53,6 +50,14 @@ class Archive:
             raise ObservationError("unregistered template binding") from error
         if registered != template_binding:
             raise ObservationError("forged template binding")
+        return registered
+
+    def ingest(self, batch_id, template_binding, byte_chunks):
+        if not isinstance(batch_id, str) or not batch_id:
+            raise ValueError("batch id must be nonempty text")
+        # Materialize privately; no database transaction is held over source iteration.
+        reader = BitReader(byte_chunks)
+        registered = self._require_registered_binding(template_binding)
         digest = compute_input_digest(registered, reader.data)
         existing = find_receipt(self.db, batch_id)
         if existing is not None:
@@ -63,6 +68,20 @@ class Archive:
         reader.finish_payload()
         observations = assemble_observations(events, header)
         validate_batch_observations(events, observations, registered)
+        return publish_batch(self.db, batch_id, registered, digest, header, observations)
+
+    def ingest_columns(self, batch_id, template_binding, byte_chunks):
+        if not isinstance(batch_id, str) or not batch_id:
+            raise ValueError("batch id must be nonempty text")
+        # The whole packet is staged privately; a failing subset is never
+        # published because publication happens only after every subset decodes.
+        reader = BitReader(byte_chunks)
+        registered = self._require_registered_binding(template_binding)
+        digest = compute_input_digest(registered, reader.data)
+        existing = find_receipt(self.db, batch_id)
+        if existing is not None:
+            return require_same_batch(existing, digest)
+        header, observations = decode_column_packet(reader, registered)
         return publish_batch(self.db, batch_id, registered, digest, header, observations)
 
     def read_observations(self, batch_id):

@@ -9,6 +9,13 @@
     ["python3.11", "-B", "verify.py", "test_templates.TestTemplates.test_register_and_bind", "test_daily.TestDaily.test_exact_quality_filtered_mean"],
     ["python3.11", "-B", "verify.py", "test_templates.TestTemplates.test_invalid_descriptor", "test_archive.TestArchive.test_rollback_replay_reopen"],
     ["python3.11", "-B", "verify.py", "test_ingest.TestIngest.test_nested_occurrences", "test_ingest.TestIngest.test_truncation_and_source_error"],
-    ["python3.11", "-B", "verify.py", "test_quality.TestQuality.test_three_quality_states", "test_quality.TestQuality.test_reference_out_of_group"]
+    ["python3.11", "-B", "verify.py", "test_quality.TestQuality.test_three_quality_states", "test_quality.TestQuality.test_reference_out_of_group"],
+    ["python3.11", "-B", "verify.py", "test_columns.ColumnsCase.test_canonical_cases_match_literal_expectations", "test_columns.ColumnsCase.test_ragged_daily_and_subset_zero_replication", "test_columns.ColumnsCase.test_scopes_same_shape_subsets_and_three_quality_states"],
+    ["python3.11", "-B", "verify.py", "test_columns.ColumnsCase.test_column_k_wider_than_scalar_rejected", "test_columns.ColumnsCase.test_column_overflow_rejected", "test_columns.ColumnsCase.test_reserved_delayed_count_rejected", "test_columns.ColumnsCase.test_quality_length_mismatch_is_observation_error"],
+    ["python3.11", "-B", "verify.py", "test_columns.ColumnsCase.test_truncation_at_every_byte_boundary", "test_columns.ColumnsCase.test_nonzero_padding_and_trailing_byte", "test_columns.ColumnsCase.test_source_exception_is_preserved_and_not_published"],
+    ["python3.11", "-B", "verify.py", "test_columns.ColumnsCase.test_sqlite_publish_failure_rolls_back_whole_packet", "test_columns.ColumnsCase.test_replay_returns_same_receipt_and_conflicts_on_change", "test_columns.ColumnsCase.test_reopen_preserves_subset_identity_without_redecode", "test_columns.ColumnsCase.test_mixed_v1_v2_daily_and_legacy_subset_index_none"],
+    ["python3.11", "-B", "columns_cases.py", "fixtures"],
+    ["python3.11", "-B", "columns_cases.py", "verify"],
+    ["python3.11", "-B", "columns_cases.py", "demo"]
   ]
 }
