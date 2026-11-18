@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "python": "3.11",
+  "setup": [],
+  "verify": ["python3.11", "-B", "verify.py"],
+  "demo": ["python3.11", "-B", "demo.py"],
+  "checks": [
+    ["python3.11", "-B", "-m", "unittest", "discover", "-s", "tests", "-v"],
+    ["python3.11", "-B", "verify.py", "test_templates.TestTemplates.test_register_and_bind", "test_daily.TestDaily.test_exact_quality_filtered_mean"],
+    ["python3.11", "-B", "verify.py", "test_templates.TestTemplates.test_invalid_descriptor", "test_archive.TestArchive.test_rollback_replay_reopen"],
+    ["python3.11", "-B", "verify.py", "test_ingest.TestIngest.test_nested_occurrences", "test_ingest.TestIngest.test_truncation_and_source_error"],
+    ["python3.11", "-B", "verify.py", "test_quality.TestQuality.test_three_quality_states", "test_quality.TestQuality.test_reference_out_of_group"]
+  ]
+}

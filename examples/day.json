@@ -1,0 +1,45 @@
+{
+  "template_id": "COAST",
+  "revision": 1,
+  "station": "COAST_A",
+  "day": "2026-11-17",
+  "descriptors": [
+    {
+      "kind": "delayed",
+      "count_width": 2,
+      "children": [
+        {"kind": "field", "measurement": "wind_speed", "width": 10, "scale": 2, "unit": "m/s"},
+        {"kind": "quality", "width": 2}
+      ]
+    },
+    {
+      "kind": "delayed",
+      "count_width": 2,
+      "children": [
+        {
+          "kind": "delayed",
+          "count_width": 2,
+          "children": [
+            {"kind": "field", "measurement": "wind_speed", "width": 10, "scale": 2, "unit": "m/s"},
+            {"kind": "quality", "width": 2}
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "raw": [100, 300, 1023],
+    "paths": [[1, 0, 0], [1, 0, 0], [1, 0, 0]],
+    "occurrences": [[0, 0], [1, 0], [1, 1]],
+    "group_parents": [[0], [1], [1]],
+    "values": ["1", "3", null],
+    "quality": [["VALUE", 0], ["VALUE", 0], ["UNSELECTED", null]],
+    "input_count": 3,
+    "accepted_count": 2,
+    "exact_sum": "4",
+    "mean": "2"
+  },
+  "payload_bits": 141,
+  "packet_hex": "574f42530105434f4153540000000107434f4153545f41323032362d31312d31370000008d000000002464000000019259ff8000000140",
+  "oracle": "Hand concatenation: A count 0, empty bitmap; outer count 2; inner counts 1,2; raw 100,300,1023; local bitmaps [1],[1,0]. Values 100/100,300/100,None; accepted sum 1+3=4, mean 4/2=2."
+}
